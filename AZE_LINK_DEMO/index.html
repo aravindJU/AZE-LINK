@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AZE LINK – Final (Teacher Verification + Uploads)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#000;color:#fff;overflow:hidden;}
+
+/* ==== INTRO (UNCHANGED) ==== */
+#intro{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at center,#001b33 0%,#000814 80%,#000 100%);
+  z-index:999;animation:introSequence 4.8s ease forwards;
+}
+@keyframes introSequence{
+  0%{opacity:0;transform:scale(1.1);}
+  10%{opacity:1;transform:scale(1);}
+  80%{opacity:1;}
+  100%{opacity:0;visibility:hidden;}
+}
+.logo{width:240px;height:auto;opacity:0;animation:logoGlow 4.8s ease forwards;}
+@keyframes logoGlow{
+  0%{opacity:0;transform:scale(0.95);}
+  20%{opacity:1;transform:scale(1);}
+  70%{opacity:1;filter:drop-shadow(0 0 20px #33ccff);}
+  100%{opacity:0;transform:scale(1);}
+}
+
+/* ==== DASHBOARD (keeps same look) ==== */
+#dashboard{display:none;height:100vh;background:linear-gradient(135deg,#010b16,#020f25);
+  color:#e0f2fe;display:flex;flex-direction:row;overflow:hidden;}
+.sidebar{width:80px;background:#0a192f;display:flex;flex-direction:column;
+  align-items:center;padding-top:20px;gap:18px;box-shadow:4px 0 15px rgba(0,0,0,0.4);}
+.sidebar button{background:none;border:none;cursor:pointer;color:#7dd3fc;font-size:22px;
+  transition:transform .2s,color .2s;}
+.sidebar button:hover{transform:scale(1.2);color:#38bdf8;}
+.sidebar button.active{color:#fff;}
+.main{flex:1;display:flex;flex-direction:column;background:rgba(255,255,255,0.02);
+  backdrop-filter:blur(10px);}
+.topbar{background:rgba(255,255,255,0.05);padding:16px 20px;display:flex;
+  justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.1);}
+.topbar h2{font-weight:700;color:#7dd3fc;}
+.topbar .user{font-size:14px;color:#a5b4fc;}
+.content{flex:1;padding:24px;overflow-y:auto;}
+.section{display:none;}
+.section.active{display:block;animation:fadeIn .45s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+.card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  padding:18px;border-radius:12px;margin-bottom:16px;color:#cbd5e1;}
+input,textarea,select,button{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none;font-size:15px;}
+input,textarea,select{background:#0a192f;color:#e0f2fe;}
+button.action{background:#38bdf8;color:#000;font-weight:600;cursor:pointer;transition:.18s;}
+button.action:hover{background:#7dd3fc;}
+label{color:#7dd3fc;display:block;margin-top:8px;font-weight:600;}
+small.hint{color:#98a8b9;font-size:13px;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
+
+/* teacher cards */
+.teacher-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:12px;}
+.teacher-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;text-align:center;}
+.teacher-card img{width:76px;height:76px;border-radius:50%;object-fit:cover;margin-bottom:8px;}
+.teacher-card h5{color:#7dd3fc;margin:6px 0;}
+.teacher-card p{color:#94a3b8;margin-bottom:8px;}
+.teacher-card .btn-row{display:flex;gap:8px;justify-content:center;margin-top:8px;}
+.teacher-card .btn-row button{padding:8px;border-radius:8px;border:none;cursor:pointer;}
+
+/* profile modal */
+#profileModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;z-index:10000;}
+#profileContent{background:#0a192f;border-radius:12px;padding:20px;max-width:680px;width:92%;box-shadow:0 0 15px rgba(0,0,0,0.4);color:#dbeafe;display:flex;gap:16px;flex-wrap:wrap;}
+#profileContent .col{flex:1;min-width:220px;}
+#profileContent h4{color:#7dd3fc;margin-bottom:10px;}
+#profileClose{background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
+.profile-photo{width:120px;height:120px;border-radius:50%;object-fit:cover;margin-bottom:10px;}
+
+/* chat */
+.chat-box{height:260px;overflow-y:auto;background:#071223;border-radius:8px;padding:10px;margin-bottom:10px;}
+.message{padding:8px 12px;border-radius:10px;max-width:72%;margin:6px 0;display:inline-block;}
+.me{background:#38bdf8;color:#000;margin-left:auto;}
+.bot{background:rgba(255,255,255,0.1);color:#fff;margin-right:auto;}
+.file-list{list-style:none;padding:0;margin-top:8px;}
+.file-list li{padding:8px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;color:#dbeafe;}
+.file-list a{color:#7dd3fc;text-decoration:none;margin-left:12px;}
+.btn-small{padding:8px 10px;border-radius:8px;background:#1f2937;color:#e6eef6;border:none;cursor:pointer;}
+.notice{color:#9be7ff;font-weight:600;margin-top:6px;}
+.toggle-all{margin-top:10px;text-align:center;}
+</style>
+</head>
+<body>
+
+<!-- INTRO (unchanged) -->
+<div id="intro"><img src="images/logo.png" alt="AZE LINK Logo" class="logo" /></div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="sidebar" role="navigation" aria-label="Main">
+    <button onclick="showSection('teacher')" title="Teacher">🧑‍🏫</button>
+    <button onclick="showSection('school')" title="School">🏫</button>
+    <button onclick="showSection('match')" title="AI Match">🤖</button>
+    <button onclick="showSection('resources')" title="Resources">📚</button>
+    <button onclick="showSection('chat')" title="Chat">💬</button>
+    <button onclick="showSection('settings')" title="Settings">⚙️</button>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h2>AZE LINK</h2>
+      <div class="user" id="topbarUser">Welcome, Teacher</div>
+    </div>
+
+    <div class="content">
+      <!-- TEACHER -->
+      <div id="teacher" class="section active">
+        <h3>Teacher Portal</h3>
+        <div class="card">
+          <label>Full Name</label>
+          <input id="t_name" type="text" placeholder="Your full name" />
+
+          <label>Email (Gmail preferred)</label>
+          <input id="t_email" type="email" placeholder="you@gmail.com" />
+
+          <div style="display:flex;gap:8px;">
+            <button id="t_send_ver" class="btn-small" onclick="sendTeacherVerification()">Send verification</button>
+            <button id="t_verify_btn" class="btn-small" onclick="verifyTeacher()" disabled>Verify</button>
+            <div id="t_ver_status" style="margin-left:8px;color:#a5f3fc;font-weight:600;"></div>
+          </div>
+
+          <label>Subject Expertise</label>
+          <input id="t_subject" type="text" placeholder="Maths, Science" />
+
+          <label>Subject Category</label>
+          <select id="t_category">
+            <option value="">-- choose category --</option>
+            <option>STEM</option><option>Humanities</option><option>Languages</option><option>Arts</option>
+          </select>
+
+          <label>Experience (years)</label>
+          <input id="t_experience" type="number" min="0" placeholder="e.g., 3" />
+
+          <label>Upload Video Lecture (mp4) — optional</label>
+          <input id="t_video" type="file" accept="video/*" onchange="previewTeacherVideo()" />
+
+          <label>Attach files (pdf, ppt, doc) — optional</label>
+          <input id="t_files" type="file" multiple onchange="previewTeacherFiles()" />
+
+          <div id="t_file_list" style="margin-top:8px;"></div>
+
+          <!-- NEW: Profile photo + intro video for teacher (session-only, preview) -->
+          <label>Upload Profile Photo (for this session)</label>
+          <input id="t_profile_photo" type="file" accept="image/*" onchange="previewProfilePhoto()" />
+          <div id="t_profile_photo_preview" style="margin-top:8px;"></div>
+
+          <label>Upload Short Intro Video (for this session)</label>
+          <input id="t_profile_intro_video" type="file" accept="video/*" onchange="previewProfileIntroVideo()" />
+          <div id="t_profile_video_preview" style="margin-top:8px;"></div>
+          <!-- end new -->
+
+          <button class="action" onclick="saveTeacher()">Save Teacher</button>
+          <div id="t_saved_msg" class="small hint"></div>
+        </div>
+      </div>
+
+      <!-- SCHOOL -->
+      <div id="school" class="section">
+        <h3>School Portal</h3>
+        <div class="card">
+          <label>School Name</label>
+          <input id="s_name" type="text" placeholder="School name" />
+          <label>Email (Gmail preferred)</label>
+          <input id="s_email" type="email" placeholder="school@gmail.com" />
+          <div style="display:flex;gap:8px;">
+            <button id="s_send_ver" class="btn-small" onclick="sendSchoolVerification()">Send verification</button>
+            <button id="s_verify_btn" class="btn-small" onclick="verifySchool()" disabled>Verify</button>
+            <div id="s_ver_status" style="margin-left:8px;color:#a5f3fc;font-weight:600;"></div>
+          </div>
+
+          <label>Grades (e.g., 6-10)</label>
+          <input id="s_grades" type="text" placeholder="6-10" />
+          <label>Subjects Needed</label>
+          <input id="s_subjects" type="text" placeholder="Math, English" />
+          <label>Preferred Language</label>
+          <select id="s_lang"><option>English</option><option>Hindi</option><option>Malayalam</option></select>
+
+          <label>Attach files (school resources)</label>
+          <input id="s_files" type="file" multiple onchange="previewSchoolFiles()" />
+
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="action" onclick="getLocation()">Use My Location</button>
+            <div id="locationText" class="small hint" style="align-self:center;margin-left:6px;"></div>
+          </div>
+
+          <div id="s_file_list" style="margin-top:8px;"></div>
+
+          <button class="action" onclick="saveSchool()">Save School</button>
+          <div id="s_saved_msg" class="small hint"></div>
+        </div>
+      </div>
+
+      <!-- MATCH -->
+      <div id="match" class="section">
+        <h3>AI Match</h3>
+        <label>Search / Filter</label>
+        <input id="searchTeacher" type="text" placeholder="Search by name, subject or location..." oninput="filterTeachers()" />
+        <div class="toggle-all">
+          <!-- default behavior: when session profile exists, show only session profile.
+               Provide user with option to 'Show all' if they want to see mocks. -->
+          <button id="showAllBtn" class="btn-small" onclick="toggleShowAll()" style="display:none;">Show All Teachers</button>
+          <div id="matchNotice" class="notice"></div>
+        </div>
+        <div class="teacher-grid" id="teacherGrid"></div>
+      </div>
+
+      <!-- RESOURCES -->
+      <div id="resources" class="section">
+        <h3>📚 Educational Resources</h3>
+        <div class="card">
+          <label>Class</label>
+          <select id="classSelect" onchange="updateSubjects()">
+            <option value="">-- Select Class --</option>
+            <option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option>
+            <option value="9">Class 9</option><option value="10">Class 10</option>
+          </select>
+          <label>Subject</label>
+          <select id="subjectSelect" onchange="showResources()"><option value="">-- Select Subject --</option>
+          <option value="">-- Select Subject --</option>
+            <option value="math">Math</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="biology">Biology</option>
+            <option value="english">English</option>
+          </select>
+
+          <label>Upload Resource (pdf, mp4, ppt)</label>
+          <input id="resourceUpload" type="file" onchange="uploadResourceFile()" />
+          <small class="hint">Uploaded files are saved locally for demo. Use backend to persist.</small>
+        </div>
+
+        <div class="card" id="resourceList" style="display:none;">
+          <h4>Resources</h4>
+          <ul id="resourceItems" class="file-list"></ul>
+        </div>
+      </div>
+
+      <!-- CHAT -->
+      <div id="chat" class="section">
+        <h3>Chat System</h3>
+        <div class="card">
+          <div id="chatBox" class="chat-box" aria-live="polite"></div>
+          <textarea id="chatInput" rows="2" placeholder="Type a message..."></textarea>
+          <div style="display:flex;gap:8px;">
+            <button class="action" onclick="sendMessage()">Send</button>
+            <button class="btn-small" onclick="clearChat()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="settings" class="section">
+        <h3>⚙️ Settings</h3>
+        <div class="card">
+          <label>Theme</label>
+          <select id="themeSelect" onchange="applyTheme(this.value)"><option value="dark">Dark</option><option value="light">Light</option></select>
+
+          <label>Language</label>
+          <select id="langSelect"><option value="en">English</option><option value="hi">Hindi</option><option value="ml">Malayalam</option></select>
+
+          <label>Low Data Mode</label>
+          <select id="dataMode"><option value="off">Off</option><option value="on">On</option></select>
+
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="action" onclick="saveSettings()">Save</button>
+            <button class="action" style="background:#ef4444;" onclick="resetAppData()">Reset</button>
+          </div>
+          <small class="hint">Settings are saved locally for demo. Connect to backend for user accounts.</small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL (in-page rich modal showing full details) -->
+<div id="profileModal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;align-items:center;justify-content:center;">
+  <div id="profileContent" style="display:none;">
+    <div style="width:100%;text-align:right;"><button id="profileClose" onclick="closeProfile()">Close</button></div>
+    <div class="col" id="profileLeft" style="text-align:center;">
+      <img id="profilePhotoLarge" class="profile-photo" src="https://randomuser.me/api/portraits/lego/1.jpg" alt="Profile">
+      <h4 id="profileName">Name</h4>
+      <p id="profileSubject">Subject</p>
+      <div id="profileBadges" style="margin-top:8px;"></div>
+      <div id="profileVideoContainer" style="margin-top:12px;"></div>
+    </div>
+    <div class="col" id="profileRight">
+      <h4>Details</h4>
+      <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
+      <p><strong>Category:</strong> <span id="profileCategory">-</span></p>
+      <p><strong>Experience:</strong> <span id="profileExperience">-</span> years</p>
+      <h4 style="margin-top:12px">Files</h4>
+      <ul id="profileFiles" class="file-list"></ul>
+      <div style="margin-top:10px;">
+        <button class="action" onclick="requestConnectFromProfile()">Request Connect</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Intro + auto show (unchanged behavior) ===== */
+function playWhoosh(){ const a=new Audio('sounds/whoosh.mp3'); a.volume = 1; a.play().catch(()=>{}); }
+window.addEventListener('load', () => {
+  setTimeout(playWhoosh, 200);
+  setTimeout(() => {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
+    initializeFromStorage();
+  }, 4800);
+});
+
+/* ===== Navigation helper (unchanged) ===== */
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+}
+
+/* ===== Local store helpers (unchanged) ===== */
+function loadStore(){
+  try {
+    return JSON.parse(localStorage.getItem('aze_store') || '{"teachers":[],"schools":[],"resources":{}}');
+  } catch(e){
+    return {teachers:[], schools:[], resources:{}};
+  }
+}
+function saveStore(store){
+  localStorage.setItem('aze_store', JSON.stringify(store));
+}
+
+/* ===== TEACHER flows ===== */
+let teacherUploadFiles = []; // metadata only
+let schoolUploadFiles = [];
+let sessionProfilePhotoURL = "";   // session-only blob URL for profile photo
+let sessionProfileVideoURL = "";   // session-only blob URL for intro video
+let sessionTeacherName = "";       // session-only teacher name (not persisted unless saved)
+let sessionTeacherSubject = "";    // session-only subject
+let showAllTeachersFlag = false;   // controls whether to show all teachers in match
+
+function sendTeacherVerification(){
+  const email = (document.getElementById('t_email')||{}).value || '';
+  if(!email || !email.includes('@') || !email.endsWith('gmail.com')){ alert('Enter a valid Gmail address (ends with @gmail.com)'); return; }
+  document.getElementById('t_send_ver').innerText = 'Sent ✓';
+  const vbtn = document.getElementById('t_verify_btn');
+  if(vbtn) vbtn.disabled = false;
+  sessionStorage.setItem('t_ver_token','token-'+Date.now());
+  document.getElementById('t_ver_status').innerText = 'Verification sent';
+}
+function verifyTeacher(){
+  const token = sessionStorage.getItem('t_ver_token');
+  if(token){
+    document.getElementById('t_ver_status').innerText = 'Verified ✅';
+    const vbtn = document.getElementById('t_verify_btn'); if(vbtn) vbtn.disabled = true;
+    sessionStorage.removeItem('t_ver_token');
+    document.getElementById('t_send_ver').innerText='Sent ✓';
+    document.getElementById('t_saved_msg').innerText='Email verified.';
+  } else alert('No pending verification found. Click Send verification first.');
+}
+
+/* teacher file previews (metadata list) */
+function previewTeacherVideo(){
+  const f = document.getElementById('t_video').files[0];
+  if(!f) return;
+  if(f.size > 50*1024*1024) alert('Large file — consider smaller video for demo.');
+  teacherUploadFiles = teacherUploadFiles || [];
+  teacherUploadFiles.push({name:f.name, type:'video'});
+  renderTeacherFileList();
+}
+function previewTeacherFiles(){
+  const files = Array.from(document.getElementById('t_files').files || []);
+  files.forEach(f => teacherUploadFiles.push({name:f.name, type:'file'}));
+  renderTeacherFileList();
+}
+function renderTeacherFileList(){
+  const wrap = document.getElementById('t_file_list');
+  if(!wrap) return;
+  if(!teacherUploadFiles.length){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<ul class="file-list">' + teacherUploadFiles.map((f,i)=>`<li>${escapeHtml(f.name)} <button class="btn-small" onclick="removeTeacherFile(${i})">Remove</button></li>`).join('') + '</ul>';
+}
+function removeTeacherFile(i){ teacherUploadFiles.splice(i,1); renderTeacherFileList(); }
+
+/* session-only profile photo/video preview (instant) */
+function previewProfilePhoto(){
+  const f = document.getElementById('t_profile_photo').files[0];
+  if(!f) return;
+  try { if(sessionProfilePhotoURL) URL.revokeObjectURL(sessionProfilePhotoURL); } catch(e){}
+  sessionProfilePhotoURL = URL.createObjectURL(f);
+  document.getElementById('t_profile_photo_preview').innerHTML = `<img src="${sessionProfilePhotoURL}" style="width:90px;height:90px;border-radius:50%;display:block;margin-top:8px;">`;
+}
+function previewProfileIntroVideo(){
+  const f = document.getElementById('t_profile_intro_video').files[0];
+  if(!f) return;
+  try { if(sessionProfileVideoURL) URL.revokeObjectURL(sessionProfileVideoURL); } catch(e){}
+  sessionProfileVideoURL = URL.createObjectURL(f);
+  if(f.size > 20*1024*1024) alert('Intro video large — consider <20MB for smooth preview.');
+  document.getElementById('t_profile_video_preview').innerHTML = `<video width="220" height="140" controls style="margin-top:8px;border-radius:8px;"><source src="${sessionProfileVideoURL}" type="${f.type}"></video>`;
+}
+
+/* Save teacher to local store — also set session-first behavior */
+function saveTeacher(){
+  const name = (document.getElementById('t_name')||{}).value.trim();
+  if(!name){ alert('Enter teacher name'); return; }
+  const email = (document.getElementById('t_email')||{}).value.trim();
+  const subject = (document.getElementById('t_subject')||{}).value.trim();
+  const category = (document.getElementById('t_category')||{}).value || '';
+  const experience = (document.getElementById('t_experience')||{}).value || '';
+  const verified = ((document.getElementById('t_ver_status')||{}).innerText||'').includes('Verified');
+
+  const store = loadStore();
+  store.teachers = store.teachers || [];
+  const teacher = { id:'t'+Date.now(), name, email, subject, category, experience, verified, files: teacherUploadFiles.slice(), avatar: '' };
+  store.teachers.push(teacher);
+  saveStore(store);
+
+  // set session-first profile data
+  sessionTeacherName = teacher.name;
+  sessionTeacherSubject = teacher.subject;
+  // sessionProfilePhotoURL & sessionProfileVideoURL are already assigned via previews (if user uploaded)
+  updateTopbarWithSessionName();
+
+  // Ensure default behavior: hide other teachers when session profile exists
+  showAllTeachersFlag = false;
+  updateMatchNotice();
+
+  document.getElementById('t_saved_msg').innerText = 'Teacher saved locally.';
+  populateTeacherGrid();
+
+  // clear form except previews (we keep preview so user can see it)
+  document.getElementById('t_name').value=''; document.getElementById('t_email').value=''; document.getElementById('t_subject').value=''; document.getElementById('t_category').value=''; document.getElementById('t_experience').value=''; teacherUploadFiles = []; renderTeacherFileList();
+}
+
+/* ===== SCHOOL flows (unchanged) ===== */
+function sendSchoolVerification(){
+  const email = (document.getElementById('s_email')||{}).value || '';
+  if(!email || !email.includes('@') || !email.endsWith('gmail.com')){ alert('Enter a valid Gmail (ends with @gmail.com)'); return; }
+  document.getElementById('s_send_ver').innerText = 'Sent ✓';
+  const vbtn = document.getElementById('s_verify_btn'); if(vbtn) vbtn.disabled = false;
+  sessionStorage.setItem('s_ver_token','token-'+Date.now());
+  document.getElementById('s_ver_status').innerText = 'Verification sent';
+}
+function verifySchool(){
+  const token = sessionStorage.getItem('s_ver_token');
+  if(token){
+    document.getElementById('s_ver_status').innerText='Verified ✅';
+    document.getElementById('s_verify_btn').disabled=true;
+    sessionStorage.removeItem('s_ver_token');
+    document.getElementById('s_send_ver').innerText='Sent ✓';
+    document.getElementById('s_saved_msg').innerText='Email verified.';
+  } else alert('No pending verification found. Click Send verification first.');
+}
+function previewSchoolFiles(){
+  const files = Array.from(document.getElementById('s_files').files || []);
+  files.forEach(f=> schoolUploadFiles.push({name:f.name, type:'file'}));
+  renderSchoolFileList();
+}
+function renderSchoolFileList(){
+  const wrap = document.getElementById('s_file_list');
+  if(!wrap) return;
+  if(!schoolUploadFiles.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = '<ul class="file-list">' + schoolUploadFiles.map((f,i)=>`<li>${escapeHtml(f.name)} <button class="btn-small" onclick="removeSchoolFile(${i})">Remove</button></li>`).join('') + '</ul>';
+}
+function removeSchoolFile(i){ schoolUploadFiles.splice(i,1); renderSchoolFileList(); }
+function getLocation(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(p=> {
+      document.getElementById('locationText').innerText = `📍 Latitude: ${p.coords.latitude.toFixed(4)}, Longitude: ${p.coords.longitude.toFixed(4)}`;
+      sessionStorage.setItem('last_location', JSON.stringify({lat:p.coords.latitude,lon:p.coords.longitude}));
+    }, err => alert('Location denied or unavailable.'));
+  } else alert('Geolocation not supported.');
+}
+function saveSchool(){
+  const name = (document.getElementById('s_name')||{}).value.trim();
+  if(!name){ alert('Enter school name'); return; }
+  const email = (document.getElementById('s_email')||{}).value.trim();
+  const grades = (document.getElementById('s_grades')||{}).value.trim();
+  const subjects = (document.getElementById('s_subjects')||{}).value.trim();
+  const lang = (document.getElementById('s_lang')||{}).value || '';
+  const verified = ((document.getElementById('s_ver_status')||{}).innerText||'').includes('Verified');
+  const loc = sessionStorage.getItem('last_location') ? JSON.parse(sessionStorage.getItem('last_location')) : null;
+
+  const store = loadStore();
+  store.schools = store.schools || [];
+  const school = { id:'s'+Date.now(), name, email, grades, subjects, lang, verified, location:loc, files: schoolUploadFiles.slice() };
+  store.schools.push(school);
+  saveStore(store);
+  document.getElementById('s_saved_msg').innerText = 'School saved locally.';
+  schoolUploadFiles = []; renderSchoolFileList();
+  populateTeacherGrid();
+}
+
+/* ===== MATCH grid + behavior requested ===== */
+function initializeFromStorage(){
+  const st = loadStore();
+  if(!st.teachers) st.teachers = [];
+  if(!st.schools) st.schools = [];
+  if(!st.resources) st.resources = {};
+  saveStore(st);
+  loadSettingsUI();
+  populateTeacherGrid();
+  updateTopbarWithSessionName();
+  updateMatchNotice();
+}
+
+function populateTeacherGrid(){
+  const grid = document.getElementById('teacherGrid');
+  const store = loadStore();
+  const saved = (store.teachers || []).slice().reverse(); // newest first
+  // If user has created a session-first profile (sessionTeacherName set) and showAllTeachersFlag is false:
+  if(sessionTeacherName && !showAllTeachersFlag){
+    // Show only session profile (user requested default behavior)
+    const name = escapeHtml(sessionTeacherName);
+    const subj = escapeHtml(sessionTeacherSubject || '');
+    const avatar = sessionProfilePhotoURL || 'https://randomuser.me/api/portraits/lego/1.jpg';
+    let html = `<div class="teacher-card" data-info="${(name+' '+subj).toLowerCase()}">
+      <img src="${avatar}" alt="${name}">
+      <h5>${name} <span style="color:#9be7ff;font-size:12px;">(You)</span></h5>
+      <p>${subj}</p>
+      <div style="margin-top:8px;">${sessionProfileVideoURL ? `<video width="180" height="110" controls style="border-radius:8px;"><source src="${sessionProfileVideoURL}"></video>` : ''}</div>
+      <div class="btn-row"><button class="btn-small" onclick="viewSessionProfile()">View Profile</button><button class="btn-small" onclick="toggleShowAll()">Show all</button></div>
+    </div>`;
+    grid.innerHTML = html;
+    document.getElementById('showAllBtn').style.display = 'inline-block';
+    updateMatchNotice('Showing only your profile. Click "Show all" to view others.');
+    return;
+  }
+
+  // else show all (saved + demo)
+  const demos = demoTeachers();
+  const items = saved.concat(demos);
+  grid.innerHTML = items.map(t => renderTeacherCard(t)).join('');
+  document.getElementById('showAllBtn').style.display = saved.length || demos.length ? 'inline-block' : 'none';
+  updateMatchNotice('');
+}
+
+function toggleShowAll(){
+  showAllTeachersFlag = !showAllTeachersFlag;
+  if(showAllTeachersFlag){
+    // show everyone
+    document.getElementById('showAllBtn').innerText = 'Showing All — Hide Yours';
+    updateMatchNotice('');
+  } else {
+    document.getElementById('showAllBtn').innerText = 'Show All Teachers';
+    updateMatchNotice('Showing only your profile. Click "Show all" to view others.');
+  }
+  populateTeacherGrid();
+}
+
+function updateMatchNotice(text){
+  const el = document.getElementById('matchNotice');
+  if(text) el.innerText = text;
+  else el.innerText = (sessionTeacherName && !showAllTeachersFlag) ? 'Showing only your profile.' : '';
+}
+
+function renderTeacherCard(t){
+  const name = escapeHtml(t.name || t.displayName || 'Unknown');
+  const subj = escapeHtml(t.subject || t.subjects || '—');
+  const loc = escapeHtml((t.location && t.location.city) || '');
+  const verifiedBadge = t.verified ? ' ✅' : '';
+  const avatar = t.avatar || (t.email && `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7dd3fc&color=000`) || 'https://randomuser.me/api/portraits/lego/1.jpg';
+  const id = t.id || ('demo-'+(name.replace(/\s+/g,'').toLowerCase()));
+  return `<div class="teacher-card" data-info="${(name+' '+subj+' '+loc).toLowerCase()}">
+    <img src="${avatar}" alt="${name}">
+    <h5>${name}${verifiedBadge}</h5>
+    <p>${subj}${loc? ' • '+loc : ''}</p>
+    <div class="btn-row"><button class="btn-small" onclick="connectTeacher('${id}')">Connect</button><button class="btn-small" onclick="viewProfile('${id}')">View Profile</button></div>
+  </div>`;
+}
+
+function demoTeachers(){
+  return [
+    {id:'demo1', name:'Anita Sharma', displayName:'Anita Sharma', subject:'Math', avatar:'https://randomuser.me/api/portraits/women/44.jpg', verified:true, files:[]},
+    {id:'demo2', name:'Ravi Kumar', displayName:'Ravi Kumar', subject:'Science', avatar:'https://randomuser.me/api/portraits/men/46.jpg', verified:false, files:[]},
+    {id:'demo3', name:'Meera Nair', displayName:'Meera Nair', subject:'English', avatar:'https://randomuser.me/api/portraits/women/47.jpg', verified:true, files:[]},
+    {id:'demo4', name:'Arjun Patel', displayName:'Arjun Patel', subject:'Physics', avatar:'https://randomuser.me/api/portraits/men/48.jpg', verified:true, files:[]},
+    {id:'demo5', name:'Kavita Rao', displayName:'Kavita Rao', subject:'Biology', avatar:'https://randomuser.me/api/portraits/women/49.jpg', verified:true, files:[]},
+    {id:'demo6', name:'Vikram Singh', displayName:'Vikram Singh', subject:'Chemistry', avatar:'https://randomuser.me/api/portraits/men/50.jpg', verified:true, files:[]},
+    {id:'demo7', name:'Neha Verma', displayName:'Neha Verma', subject:'History', avatar:'https://randomuser.me/api/portraits/women/51.jpg', verified:true, files:[]},
+    {id:'demo8', name:'Rahul Das', displayName:'Rahul Das', subject:'Geography', avatar:'https://randomuser.me/api/portraits/men/52.jpg', verified:true, files:[]},
+    {id:'demo9', name:'Priya Menon', displayName:'Priya Menon', subject:'Computer Science', avatar:'https://randomuser.me/api/portraits/women/53.jpg', verified:true, files:[]},
+    {id:'demo10', name:'Manoj Pillai', displayName:'Manoj Pillai', subject:'Economics', avatar:'https://randomuser.me/api/portraits/men/54.jpg', verified:true, files:[]},
+    {id:'demo11', name:'Sanjana Bhat', displayName:'Sanjana Bhat', subject:'Psychology', avatar:'https://randomuser.me/api/portraits/women/55.jpg', verified:true, files:[]},
+    {id:'demo12', name:'Ajay Reddy', displayName:'Ajay Reddy', subject:'Political Science', avatar:'https://randomuser.me/api/portraits/men/56.jpg', verified:true, files:[]},
+    {id:'demo13', name:'Deepa Ghosh', displayName:'Deepa Ghosh', subject:'Environmental Studies', avatar:'https://randomuser.me/api/portraits/women/58.jpg', verified:true, files:[]},
+    {id:'demo14', name:'Suresh Iyer', displayName:'Suresh Iyer', subject:'Computer Applications', avatar:'https://randomuser.me/api/portraits/men/60.jpg', verified:true, files:[]}
+  ];
+}
+
+/* filter */
+function filterTeachers(){
+  const q = (document.getElementById('searchTeacher')||{}).value || '';
+  const ql = q.toLowerCase().trim();
+  document.querySelectorAll('#teacherGrid .teacher-card').forEach(c=>{
+    c.style.display = ql ? (c.dataset.info.includes(ql) ? 'block' : 'none') : 'block';
+  });
+}
+
+/* connect, view profile actions */
+function connectTeacher(id){ alert('Connection request sent (demo). Teacher id: '+id); }
+
+/* viewProfile: open modal with details for saved teacher or demo
+   additional requirement: when user saved session profile and clicks 'View Profile' (session variant), show session info */
+function viewProfile(id){
+  // first check saved teachers
+  const store = loadStore();
+  const t = (store.teachers||[]).find(x=>x.id===id);
+  if(t){
+    openProfileModalFromTeacher(t);
+    return;
+  }
+  // check demo teachers
+  const demo = demoTeachers().find(d => d.id === id);
+  if(demo){ openProfileModalFromTeacher(demo); return; }
+  alert('Profile not found.');
+}
+function viewSessionProfile(){
+  // show session-only profile (not necessarily saved) in modal
+  const t = {
+    id: 'session',
+    name: sessionTeacherName || 'You',
+    email: '-', subject: sessionTeacherSubject || '-',
+    category: '-', experience: '-', verified: true,
+    files: [],
+    avatar: sessionProfilePhotoURL || 'https://randomuser.me/api/portraits/lego/1.jpg'
+  };
+  openProfileModalFromTeacher(t, true);
+}
+
+function openProfileModalFromTeacher(t, isSession=false){
+  // Prepare modal elements
+  const modal = document.getElementById('profileModal');
+  const content = document.getElementById('profileContent');
+  const photo = document.getElementById('profilePhotoLarge');
+  const name = document.getElementById('profileName');
+  const subj = document.getElementById('profileSubject');
+  const email = document.getElementById('profileEmail');
+  const cat = document.getElementById('profileCategory');
+  const exp = document.getElementById('profileExperience');
+  const filesEl = document.getElementById('profileFiles');
+  const badges = document.getElementById('profileBadges');
+  const videoContainer = document.getElementById('profileVideoContainer');
+
+  // Fill data
+  photo.src = isSession ? (sessionProfilePhotoURL || t.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg') : (t.avatar || (t.email && `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=7dd3fc&color=000`) || 'https://randomuser.me/api/portraits/lego/1.jpg');
+  name.innerText = t.name || 'Unknown';
+  subj.innerText = t.subject || '-';
+  email.innerText = t.email || '-';
+  cat.innerText = t.category || '-';
+  exp.innerText = t.experience || '-';
+  badges.innerHTML = t.verified ? `<span style="color:#9be7ff;font-weight:600;">Verified ✅</span>` : '';
+  filesEl.innerHTML = '';
+
+  // Files list
+  const fl = t.files || [];
+  if(fl.length){
+    fl.forEach((f,i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `${escapeHtml(f.name)} <a href="#" onclick="alert('Download demo: ${escapeHtml(f.name)}')">Download</a>`;
+      filesEl.appendChild(li);
+    });
+  } else {
+    filesEl.innerHTML = '<li style="padding:8px;background:transparent;color:#9be7ff;">No attached files</li>';
+  }
+
+  // video: if session and sessionProfileVideoURL exists, show it; else if teacher has video file metadata, we cannot play real file — show notice
+  videoContainer.innerHTML = '';
+  if(isSession && sessionProfileVideoURL){
+    videoContainer.innerHTML = `<video width="320" height="180" controls style="border-radius:8px;"><source src="${sessionProfileVideoURL}"></video>`;
+  } else if(!isSession && fl && fl.find(f=>f.type==='video')){
+    videoContainer.innerHTML = `<div style="color:#9be7ff;font-size:13px;">Intro video (uploaded) — demo mode: preview not available</div>`;
+  } else {
+    videoContainer.innerHTML = `<div style="color:#98a8b9;font-size:13px;">No intro video available</div>`;
+  }
+
+  // show modal
+  modal.style.display = 'flex';
+  content.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+  // scroll to top of modal content to ensure visible
+  content.scrollTop = 0;
+}
+function closeProfile(){
+  const modal = document.getElementById('profileModal');
+  const content = document.getElementById('profileContent');
+  modal.style.display = 'none';
+  content.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+/* helper from profile modal */
+function requestConnectFromProfile(){
+  alert('Connection request sent from profile (demo).');
+}
+
+/* ===== RESOURCES (unchanged behavior) ===== */
+const resourceDB = JSON.parse(localStorage.getItem('aze_resources') || '{"6":{},"7":{},"8":{},"9":{},"10":{}}');
+function updateSubjects(){
+  const cls = document.getElementById('classSelect').value;
+  const subj = document.getElementById('subjectSelect');
+  subj.innerHTML = '<option value="">-- Select Subject --</option>';
+  if(resourceDB[cls]) Object.keys(resourceDB[cls]).forEach(s=> subj.innerHTML += `<option>${s}</option>`);
+}
+function showResources(){
+  const cls = document.getElementById('classSelect').value;
+  const s = document.getElementById('subjectSelect').value;
+  const list = document.getElementById('resourceItems');
+  list.innerHTML = '';
+  if(resourceDB[cls] && resourceDB[cls][s]){
+    document.getElementById('resourceList').style.display='block';
+    resourceDB[cls][s].forEach((r,i)=> list.innerHTML += `<li>${escapeHtml(r.name)} <span style="font-size:13px;color:#9be7ff;margin-left:8px">[${r.type}]</span> <a href="#" onclick="downloadResource('${cls}','${s}',${i})">Download</a></li>`);
+  } else document.getElementById('resourceList').style.display='none';
+}
+function uploadResourceFile(){
+  const f = document.getElementById('resourceUpload').files[0];
+  const cls = document.getElementById('classSelect').value;
+  const s = document.getElementById('subjectSelect').value;
+  if(!f){ alert('Choose a file to upload'); return; }
+  if(!cls || !s){ alert('Select class and subject first'); return; }
+  const rec = {name:f.name, type: (f.type || 'file').split('/')[0]};
+  resourceDB[cls][s] = resourceDB[cls][s] || [];
+  resourceDB[cls][s].push(rec);
+  localStorage.setItem('aze_resources', JSON.stringify(resourceDB));
+  showResources();
+  alert('Uploaded (demo): '+f.name);
+}
+function downloadResource(cls, subj, index){
+  const item = resourceDB[cls][subj][index];
+  alert('Download (demo): '+item.name);
+}
+
+/* ===== CHAT (unchanged simple demo) ===== */
+function sendMessage(){
+  const input = document.getElementById('chatInput'); const box = document.getElementById('chatBox');
+  const text = input.value.trim(); if(!text) return;
+  const me = document.createElement('div'); me.className='message me'; me.innerText = text; box.appendChild(me);
+  input.value=''; box.scrollTop = box.scrollHeight;
+  setTimeout(()=>{ const bot = document.createElement('div'); bot.className='message bot'; bot.innerText = 'Got it! We will follow up.'; box.appendChild(bot); box.scrollTop = box.scrollHeight; },700);
+}
+function clearChat(){ document.getElementById('chatBox').innerHTML=''; }
+
+/* ===== SETTINGS (unchanged) ===== */
+function applyTheme(t){
+  if(t==='light'){ document.body.style.background='#f4f4f9'; document.body.style.color='#000'; document.querySelectorAll('.card').forEach(c=>c.style.background='rgba(255,255,255,0.9)'); }
+  else { document.body.style.background='#000'; document.body.style.color='#fff'; document.querySelectorAll('.card').forEach(c=>c.style.background='rgba(255,255,255,0.05)'); }
+  localStorage.setItem('aze_settings', JSON.stringify({theme:t}));
+}
+function saveSettings(){
+  const s = {theme:document.getElementById('themeSelect').value, lang:document.getElementById('langSelect').value, data:document.getElementById('dataMode').value};
+  localStorage.setItem('aze_settings', JSON.stringify(s));
+  alert('Settings saved');
+}
+function loadSettingsUI(){
+  const s = JSON.parse(localStorage.getItem('aze_settings')|| '{}');
+  if(s.theme) document.getElementById('themeSelect').value = s.theme;
+  if(s.lang) document.getElementById('langSelect').value = s.lang;
+  if(s.data) document.getElementById('dataMode').value = s.data;
+  if(s.theme) applyTheme(s.theme);
+}
+function resetAppData(){ if(confirm('Clear all demo data?')){ localStorage.removeItem('aze_store'); localStorage.removeItem('aze_resources'); localStorage.removeItem('aze_settings'); sessionStorage.clear(); sessionProfilePhotoURL=''; sessionProfileVideoURL=''; sessionTeacherName=''; sessionTeacherSubject=''; showAllTeachersFlag=false; alert('Demo data cleared'); location.reload(); } }
+
+/* ===== Utilities ===== */
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ===== Initialize demo store if none ===== */
+(function ensureDemo(){
+  const st = loadStore();
+  if(!st.teachers || !st.schools || !st.resources){
+    saveStore({teachers:[],schools:[],resources:{}});
+  }
+})();
+
+/* ===== Helper: update topbar with session name (session-only) ===== */
+function updateTopbarWithSessionName(){
+  const el = document.getElementById('topbarUser');
+  if(sessionTeacherName && sessionTeacherName.trim()){
+    el.innerText = `Welcome, ${sessionTeacherName}`;
+  } else {
+    el.innerText = 'Welcome, Teacher';
+  }
+}
+
+/* ===== Populate initially ===== */
+setTimeout(()=>{ populateTeacherGrid(); loadSettingsUI(); updateTopbarWithSessionName(); },900);
+</script>
+</body>
+</html>
